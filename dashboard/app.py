@@ -23,7 +23,7 @@ sys.path.append(parent_dir)
 try:
     from serving_layer.query_engine import ServingLayer
 except ImportError:
-    st.error("Neural Core Link Failure: Serving Layer not found in path.")
+    st.error("Pipeline Core Link Failure: Serving Layer not found in path.")
     st.stop()
 
 # --- 25TH CENTURY HUD STYLING ---
@@ -117,7 +117,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- NEURAL LINK SETUP ---
+# --- PIPELINE CONTROL PANEL ---
 sl = ServingLayer()
 
 def fetch_telemetry():
@@ -126,15 +126,15 @@ def fetch_telemetry():
     df_raw = sl.get_unified_view()
     return kpis, recent, df_raw
 
-# --- SIDEBAR HUD ---
+# --- SIDEBAR CONTROL PANEL ---
 with st.sidebar:
-    st.markdown("<h1 style='color:#00f3ff; font-family:monospace;'>[ NEBULA_OS ]</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color:#00f3ff; font-family:monospace;'>[ LAMBDA_CORE ]</h1>", unsafe_allow_html=True)
     st.image("https://img.icons8.com/nolan/128/satellite.png")
     st.divider()
     
-    st.markdown("### SYSTEM CONTROLS")
-    sync_active = st.toggle("Neural Pulse Active", value=True)
-    sync_freq = st.select_slider("Quantum Sync Frequency", options=[1, 2, 5, 10, 30], value=5)
+    st.markdown("### PIPELINE CONTROLS")
+    sync_active = st.toggle("Live Stream Pulse", value=True)
+    sync_freq = st.select_slider("Dashboard Refresh Interval (s)", options=[1, 2, 5, 10, 30], value=5)
     
     st.divider()
     st.caption("CORE STATUS: ONLINE")
@@ -142,8 +142,8 @@ with st.sidebar:
     st.caption("MEMORY LOAD: 14.2 GB / 64 GB")
 
 # --- MAIN HUD CONTENT ---
-st.markdown('<h1 class="glitch-title">NEBULA DATA PLATFORM</h1>', unsafe_allow_html=True)
-st.markdown('<p class="hud-label">// LAMBDA ARCHITECTURE // QUANTUM SERVING LAYER v2.5.0</p>', unsafe_allow_html=True)
+st.markdown('<h1 class="glitch-title">LAMBDA DATA PLATFORM</h1>', unsafe_allow_html=True)
+st.markdown('<p class="hud-label">// LAMBDA ARCHITECTURE // UNIFIED SERVING LAYER v2.5.0</p>', unsafe_allow_html=True)
 st.markdown('<div class="hud-line"></div>', unsafe_allow_html=True)
 
 # Telemetry Sync
@@ -153,25 +153,25 @@ kpis, recent, df_all = fetch_telemetry()
 m1, m2, m3, m4 = st.columns(4)
 
 with m1:
-    st.metric("NET TELEMETRY VOLUME", f"${kpis['total_sales'] / 1000:,.1f}K", delta="STABLE")
+    st.metric("TOTAL REVENUE VOLUME", f"${kpis['total_sales'] / 1000:,.1f}K", delta="STABLE")
 
 with m2:
-    st.metric("ACTIVE DATAPOINTS", f"{kpis['transaction_count']:,}", delta="SYNCED")
+    st.metric("TOTAL TRANSACTIONS", f"{kpis['transaction_count']:,}", delta="SYNCED")
 
 with m3:
-    st.metric("MEAN NEURAL DENSITY", f"${kpis['avg_order_value']:.2f}")
+    st.metric("AVERAGE ORDER VALUE", f"${kpis['avg_order_value']:.2f}")
 
 with m4:
     sync_ts = "OFFLINE"
     if df_all is not None and not df_all.empty:
         sync_ts = pd.to_datetime(df_all['timestamp']).max().strftime("%H:%M:%S")
-    st.metric("LAST HANDSHAKE", sync_ts, delta="ACTIVE")
+    st.metric("LAST DATA POLL", sync_ts, delta="ACTIVE")
 
 # --- ANALYSIS GRID ---
 g1, g2 = st.columns([2, 1])
 
 with g1:
-    st.markdown("### <span style='color:#00f3ff'>◣</span> TEMPORAL FLOW ANALYSIS", unsafe_allow_html=True)
+    st.markdown("### <span style='color:#00f3ff'>◣</span> HOURLY REVENUE TREND", unsafe_allow_html=True)
     if df_all is not None and not df_all.empty:
         df_all['timestamp'] = pd.to_datetime(df_all['timestamp'])
         df_chart = df_all.set_index('timestamp').resample('H')['amount'].sum().reset_index()
@@ -183,7 +183,7 @@ with g1:
             fill='tozeroy',
             line=dict(color='#00f3ff', width=3),
             fillcolor='rgba(0, 243, 255, 0.1)',
-            name='Protocol Flow'
+            name='Transaction Flow'
         ))
         fig.update_layout(
             template="plotly_dark",
@@ -197,10 +197,10 @@ with g1:
         )
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.info("Awaiting Temporal Data... Initializing Neural Pathways.")
+        st.info("Awaiting Pipeline Data... Synchronizing Streams.")
 
 with g2:
-    st.markdown("### <span style='color:#00ff9f'>◣</span> ENTITY SEGMENTATION", unsafe_allow_html=True)
+    st.markdown("### <span style='color:#00ff9f'>◣</span> PRODUCT SEGMENTATION", unsafe_allow_html=True)
     if df_all is not None and not df_all.empty:
         prod_dist = df_all.groupby('product')['amount'].count().reset_index()
         fig_pie = go.Figure(data=[go.Pie(
@@ -219,7 +219,7 @@ with g2:
         st.plotly_chart(fig_pie, use_container_width=True)
 
 # --- LIVE FEED HUD ---
-st.markdown("### <span style='color:#00f3ff'>◣</span> DATA STREAM INTERCEPT", unsafe_allow_html=True)
+st.markdown("### <span style='color:#00f3ff'>◣</span> REAL-TIME EVENT STREAM", unsafe_allow_html=True)
 if not recent.empty:
     st.dataframe(
         recent.style.format({"amount": "${:,.2f}"}),
@@ -231,8 +231,8 @@ else:
 # --- FOOTER HUD ---
 st.markdown(f"""
     <div style="background: rgba(0, 243, 255, 0.05); padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.7rem; border-left: 5px solid #00f3ff; display: flex; justify-content: space-between; align-items: center; margin-top: 3rem;">
-        <div>SYSTEM_VERSION: 1.0.4-LMBDA | ENCRYPTION: AES-256-QUANTUM | ORIGIN: NEBULA_CORE</div>
-        <div style="color:#00f3ff">● SYNC_TIMESTAMP: {datetime.now().strftime('%H:%M:%S')}</div>
+        <div>SYSTEM_VERSION: 1.0.4-LMBDA | ARCHITECTURE: LAMBDA | ORIGIN: PIPELINE_CORE</div>
+        <div style="color:#00f3ff">● LAST_SYNC_POLL: {datetime.now().strftime('%H:%M:%S')}</div>
     </div>
 """, unsafe_allow_html=True)
 
