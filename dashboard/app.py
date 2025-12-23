@@ -219,11 +219,10 @@ with g2:
         st.plotly_chart(fig_pie, use_container_width=True)
 
 # --- LIVE FEED HUD ---
-st.markdown("### <span style='color:#00f3ff'>◣</span> DATA STREAM INTERCEPT")
+st.markdown("### <span style='color:#00f3ff'>◣</span> DATA STREAM INTERCEPT", unsafe_allow_html=True)
 if not recent.empty:
     st.dataframe(
-        recent.style.format({"amount": "${:,.2f}"})
-        .background_gradient(subset=['amount'], cmap='YlGnBu_r'),
+        recent.style.format({"amount": "${:,.2f}"}),
         use_container_width=True
     )
 else:
