@@ -1,10 +1,10 @@
-# Lambda Architecture Data Platform
+# NEBULA | Lambda Architecture Data Platform
 
-![Status](https://img.shields.io/badge/Status-Production--Ready-green)
-![Architecture](https://img.shields.io/badge/Architecture-Lambda-blue)
-![Database](https://img.shields.io/badge/Database-DuckDB-orange)
+![Status](https://img.shields.io/badge/Status-Production--Ready-blueviolet)
+![Architecture](https://img.shields.io/badge/Architecture-Lambda-00f3ff)
+![UI](https://img.shields.io/badge/UI-HUD--Modern-00ff9f)
 
-An end-to-end, production-grade **Lambda Architecture** implementation designed for high-velocity data ingestion, historical accuracy, and real-time analytical serving.
+NEBULA is a 25th-century, production-grade **Lambda Architecture** implementation designed for high-velocity data ingestion, historical accuracy, and real-time analytical serving.
 
 ## 🏗️ Architecture Overview
 
@@ -13,7 +13,7 @@ The platform implements the classic Lambda design:
 2.  **Speed Layer**: Processes real-time micro-batches of event streams for low-latency insights.
 3.  **Serving Layer**: Provides a unified SQL interface via DuckDB that merges Batch and Speed layers on-the-fly.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Python 3.9 or higher

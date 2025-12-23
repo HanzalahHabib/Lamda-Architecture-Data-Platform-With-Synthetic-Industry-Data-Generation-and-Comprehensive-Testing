@@ -7,231 +7,237 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 
-# Check if parent dir is in path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.append(parent_dir)
-
-from serving_layer.query_engine import ServingLayer
-
-# --- Page Config ---
+# --- SYSTEM INITIALIZATION ---
 st.set_page_config(
-    page_title="NEBULA | Lambda Data Platform",
-    page_icon="🚀",
+    page_title="NEBULA PLATFORM | V2.5.0",
+    page_icon="🌌",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# --- Enhanced Glassmorphism CSS ---
+# Check if parent dir is in path for Serving Layer
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+try:
+    from serving_layer.query_engine import ServingLayer
+except ImportError:
+    st.error("Neural Core Link Failure: Serving Layer not found in path.")
+    st.stop()
+
+# --- 25TH CENTURY HUD STYLING ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=JetBrains+Mono:wght@200;400&display=swap');
 
-    html, body, [class*="css"] {
-        font-family: 'Outfit', sans-serif;
+    :root {
+        --neon-cyan: #00f3ff;
+        --neon-green: #00ff9f;
+        --deep-space: #050505;
+        --glass-bg: rgba(255, 255, 255, 0.03);
     }
 
-    /* Main Background */
+    body, [class*="css"] {
+        font-family: 'Space Grotesk', sans-serif;
+        color: #e0e0e0;
+    }
+
     .stApp {
-        background: radial-gradient(circle at top right, #1a1a2e, #16213e, #0f3460);
+        background-color: var(--deep-space);
+        background-image: 
+            radial-gradient(at 0% 0%, hsla(190, 100%, 15%, 0.3) 0, transparent 50%),
+            radial-gradient(at 100% 100%, hsla(150, 100%, 10%, 0.2) 0, transparent 50%);
     }
 
-    /* Metric Containers */
+    /* Metric Cards with Glowing Border */
     div[data-testid="stMetric"] {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 20px;
-        border-radius: 20px;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        background: var(--glass-bg);
+        border: 1px solid rgba(0, 243, 255, 0.1);
+        padding: 25px !important;
+        border-radius: 12px;
+        backdrop-filter: blur(15px);
+        box-shadow: 0 0 20px rgba(0, 243, 255, 0.05);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     
     div[data-testid="stMetric"]:hover {
-        background: rgba(255, 255, 255, 0.07);
-        transform: translateY(-5px);
-        border: 1px solid rgba(0, 212, 255, 0.3);
+        border: 1px solid var(--neon-cyan);
+        box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+        transform: scale(1.02);
     }
 
-    /* Sidebar Customization */
+    /* Sidebar - HUD Style */
     section[data-testid="stSidebar"] {
-        background-color: rgba(15, 52, 96, 0.8) !important;
-        backdrop-filter: blur(20px);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: rgba(5, 5, 5, 0.95) !important;
+        border-right: 1px solid rgba(0, 243, 255, 0.15);
     }
 
-    /* Headers */
-    .main-title {
-        font-size: 3rem !important;
-        font-weight: 600;
-        background: linear-gradient(90deg, #00d4ff, #00ff87);
+    /* Titles */
+    .glitch-title {
+        font-size: 3.5rem !important;
+        font-weight: 700;
+        letter-spacing: -2px;
+        background: linear-gradient(135deg, var(--neon-cyan), var(--neon-green));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 0.5rem;
+        text-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
     }
 
-    .subtitle {
-        color: rgba(255, 255, 255, 0.6);
-        font-weight: 300;
-        letter-spacing: 2px;
+    .hud-label {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.75rem;
+        color: var(--neon-cyan);
         text-transform: uppercase;
+        letter-spacing: 4px;
         margin-bottom: 2rem;
+        opacity: 0.8;
     }
 
-    /* Dataframe styling */
+    /* Table HUD */
     .stDataFrame {
-        border-radius: 15px;
+        border: 1px solid rgba(0, 243, 255, 0.1);
+        border-radius: 10px;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Refresh Button Styling */
-    .stButton>button {
-        background: linear-gradient(45deg, #0f3460, #16213e);
-        color: white;
-        border: 1px solid rgba(0, 212, 255, 0.5);
+    /* HUD Elements */
+    .hud-line {
+        height: 2px;
+        background: linear-gradient(90deg, var(--neon-cyan), transparent);
+        margin: 10px 0 30px 0;
+    }
+
+    /* Success Glow */
+    .stAlert {
         border-radius: 10px;
-        padding: 0.5rem 2rem;
-        transition: all 0.3s ease;
-    }
-
-    .stButton>button:hover {
-        background: linear-gradient(45deg, #00d4ff, #00ff87);
-        color: #1a1a2e;
-        border: none;
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
-    }
-
-    /* Custom Status Bar */
-    .status-bar {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 20px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 10px;
-        margin-top: 2rem;
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.4);
+        background: rgba(0, 255, 159, 0.05);
+        border: 1px solid rgba(0, 255, 159, 0.2);
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- Sidebar ---
-with st.sidebar:
-    st.image("https://img.icons8.com/nolan/128/artificial-intelligence.png")
-    st.markdown("## NEBULA OS")
-    st.caption("Alpha v2.5.0 | Quantum Serving")
-    st.divider()
-    
-    st.markdown("### Controls")
-    auto_refresh = st.toggle("Real-time Pulse", value=True)
-    refresh_rate = st.slider("Neural Sync Rate (s)", 2, 10, 5)
-    
-    st.divider()
-    st.info("Unified data stream from Batch and Speed layers active.")
-
-# --- Header ---
-st.markdown('<h1 class="main-title">NEBULA DATA PLATFORM</h1>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Lambda Architecture // Automated Intelligence System</p>', unsafe_allow_html=True)
-
-# --- Serving Layer Connection ---
+# --- NEURAL LINK SETUP ---
 sl = ServingLayer()
 
-def load_data():
+def fetch_telemetry():
     kpis = sl.get_kpis()
-    recent = sl.get_recent_transactions(10)
-    df_all = sl.get_unified_view()
-    return kpis, recent, df_all
+    recent = sl.get_recent_transactions(12)
+    df_raw = sl.get_unified_view()
+    return kpis, recent, df_raw
 
-# Data Fetching
-kpis, recent, df_all = load_data()
+# --- SIDEBAR HUD ---
+with st.sidebar:
+    st.markdown("<h1 style='color:#00f3ff; font-family:monospace;'>[ NEBULA_OS ]</h1>", unsafe_allow_html=True)
+    st.image("https://img.icons8.com/nolan/128/satellite.png")
+    st.divider()
+    
+    st.markdown("### SYSTEM CONTROLS")
+    sync_active = st.toggle("Neural Pulse Active", value=True)
+    sync_freq = st.select_slider("Quantum Sync Frequency", options=[1, 2, 5, 10, 30], value=5)
+    
+    st.divider()
+    st.caption("CORE STATUS: ONLINE")
+    st.progress(100)
+    st.caption("MEMORY LOAD: 14.2 GB / 64 GB")
 
-# --- Top KPI Grid ---
-col1, col2, col3, col4 = st.columns(4)
+# --- MAIN HUD CONTENT ---
+st.markdown('<h1 class="glitch-title">NEBULA DATA PLATFORM</h1>', unsafe_allow_html=True)
+st.markdown('<p class="hud-label">// LAMBDA ARCHITECTURE // QUANTUM SERVING LAYER v2.5.0</p>', unsafe_allow_html=True)
+st.markdown('<div class="hud-line"></div>', unsafe_allow_html=True)
 
-with col1:
-    st.metric("TOTAL NET VOLUME", f"${kpis['total_sales'] / 1000:,.1f}K", delta=f"{len(df_all) if df_all is not None else 0} Events")
+# Telemetry Sync
+kpis, recent, df_all = fetch_telemetry()
 
-with col2:
-    st.metric("ACTIVE TRANSACTIONS", f"{kpis['transaction_count']:,}", delta="SYNCED")
+# --- TOP HUD METRICS ---
+m1, m2, m3, m4 = st.columns(4)
 
-with col3:
-    st.metric("AVG NEURAL VALUE", f"${kpis['avg_order_value']:.2f}", delta="+4.2%")
+with m1:
+    st.metric("NET TELEMETRY VOLUME", f"${kpis['total_sales'] / 1000:,.1f}K", delta="STABLE")
 
-with col4:
-    # Custom Pulse Metric
-    last_event_time = "N/A"
+with m2:
+    st.metric("ACTIVE DATAPOINTS", f"{kpis['transaction_count']:,}", delta="SYNCED")
+
+with m3:
+    st.metric("MEAN NEURAL DENSITY", f"${kpis['avg_order_value']:.2f}")
+
+with m4:
+    sync_ts = "OFFLINE"
     if df_all is not None and not df_all.empty:
-        last_event_time = pd.to_datetime(df_all['timestamp']).max().strftime("%H:%M:%S")
-    st.metric("LAST HANDSHAKE", last_event_time, delta="ACTIVE", delta_color="normal")
+        sync_ts = pd.to_datetime(df_all['timestamp']).max().strftime("%H:%M:%S")
+    st.metric("LAST HANDSHAKE", sync_ts, delta="ACTIVE")
 
-st.divider()
+# --- ANALYSIS GRID ---
+g1, g2 = st.columns([2, 1])
 
-# --- Visualization Section ---
-c1, c2 = st.columns([2, 1])
-
-with c1:
-    st.markdown("### <span style='color:#00d4ff'>■</span> Real-time Transaction Pulse", unsafe_allow_html=True)
+with g1:
+    st.markdown("### <span style='color:#00f3ff'>◣</span> TEMPORAL FLOW ANALYSIS", unsafe_allow_html=True)
     if df_all is not None and not df_all.empty:
         df_all['timestamp'] = pd.to_datetime(df_all['timestamp'])
         df_chart = df_all.set_index('timestamp').resample('H')['amount'].sum().reset_index()
         
-        # Futuristic Line Chart
-        fig = px.area(df_chart, x='timestamp', y='amount', 
-                      template="plotly_dark",
-                      color_discrete_sequence=['#00d4ff'])
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=df_chart['timestamp'], 
+            y=df_chart['amount'],
+            fill='tozeroy',
+            line=dict(color='#00f3ff', width=3),
+            fillcolor='rgba(0, 243, 255, 0.1)',
+            name='Protocol Flow'
+        ))
         fig.update_layout(
+            template="plotly_dark",
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            xaxis_title="",
-            yaxis_title="Volume ($)",
-            margin=dict(l=0, r=0, t=20, b=0),
-            height=400,
-            hovermode="x unified",
-            xaxis=dict(showgrid=False),
-            yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)')
+            margin=dict(l=0, r=0, t=10, b=0),
+            height=380,
+            xaxis=dict(showgrid=False, zeroline=False),
+            yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', zeroline=False),
+            hovermode="x unified"
         )
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.info("System initializing. No neural patterns detected yet.")
+        st.info("Awaiting Temporal Data... Initializing Neural Pathways.")
 
-with c2:
-    st.markdown("### <span style='color:#00ff87'>■</span> Product Distribution", unsafe_allow_html=True)
+with g2:
+    st.markdown("### <span style='color:#00ff9f'>◣</span> ENTITY SEGMENTATION", unsafe_allow_html=True)
     if df_all is not None and not df_all.empty:
         prod_dist = df_all.groupby('product')['amount'].count().reset_index()
-        fig_pie = px.pie(prod_dist, values='amount', names='product',
-                         hole=0.7,
-                         color_discrete_sequence=px.colors.sequential.Cyan_r)
+        fig_pie = go.Figure(data=[go.Pie(
+            labels=prod_dist['product'], 
+            values=prod_dist['amount'],
+            hole=.8,
+            marker=dict(colors=['#00f3ff', '#00ff9f', '#0099ff', '#00cc66'], line=dict(color='#000', width=2))
+        )])
         fig_pie.update_layout(
             showlegend=False,
-            margin=dict(l=0, r=0, t=0, b=0),
-            height=400,
-            paper_bgcolor="rgba(0,0,0,0)"
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            margin=dict(l=0, r=0, t=10, b=0),
+            height=380
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
-# --- Lower Table ---
-st.markdown("### <span style='color:#00d4ff'>■</span> Unified Stream Feed")
+# --- LIVE FEED HUD ---
+st.markdown("### <span style='color:#00f3ff'>◣</span> DATA STREAM INTERCEPT")
 if not recent.empty:
     st.dataframe(
         recent.style.format({"amount": "${:,.2f}"})
-        .background_gradient(subset=['amount'], cmap='GnBu'),
+        .background_gradient(subset=['amount'], cmap='YlGnBu_r'),
         use_container_width=True
     )
 else:
-    st.info("Waiting for data stream...")
+    st.warning("STREAM OFFLINE: RECONNECTING TO DATA SOURCES...")
 
-# --- Footer Status ---
+# --- FOOTER HUD ---
 st.markdown(f"""
-    <div class="status-bar">
-        <span>CORE: <b>CONNECTED</b></span>
-        <span>LATENCY: <b>12ms</b></span>
-        <span>LAST SYNC: <b>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</b></span>
-        <span>SECURITY: <b>QUANTUM-ENCRYPTED</b></span>
+    <div style="background: rgba(0, 243, 255, 0.05); padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.7rem; border-left: 5px solid #00f3ff; display: flex; justify-content: space-between; align-items: center; margin-top: 3rem;">
+        <div>SYSTEM_VERSION: 1.0.4-LMBDA | ENCRYPTION: AES-256-QUANTUM | ORIGIN: NEBULA_CORE</div>
+        <div style="color:#00f3ff">● SYNC_TIMESTAMP: {datetime.now().strftime('%H:%M:%S')}</div>
     </div>
 """, unsafe_allow_html=True)
 
-# --- Auto Refresh ---
-if auto_refresh:
-    time.sleep(refresh_rate)
+# --- NEURAL REFRESH ---
+if sync_active:
+    time.sleep(sync_freq)
     st.rerun()
